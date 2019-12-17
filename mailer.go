@@ -54,8 +54,8 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 // Send renders the headers and named template with passed data.
 // The rendered message is sent using smtp.SendMail, to all the recipients.
 //
-// Headers keys are rendered Title cased, and the values are joined with a comma seperator.
-// Each entry becomes a CRLF seperated line. For example:
+// Headers keys are rendered Title cased, and the values are joined with a comma separator.
+// Each entry becomes a CRLF separated line. For example:
 //   map[string][]string{"to": []string{"foo@bar.com", "hello@world.com"}}
 // Results in:
 //   To: foo@bar.com,hello@world.com\r\n
