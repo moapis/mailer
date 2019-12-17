@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"net/smtp"
 	"strings"
 )
@@ -18,16 +19,30 @@ const (
 	GlobalHeaders = "MIME-Version: 1.0\r\nContent-type: text/html; charset=\"UTF-8\"\r\n\r\n"
 )
 
-func mailHeaders(h map[string][]string) *bytes.Buffer {
+// Debug mode prints the outgoing mail before sending
+var Debug bool
+
+// Header for mail message
+type Header struct {
+	Key    string
+	Values []string
+}
+
+func (h Header) String() string {
+	if h.Values == nil {
+		return ""
+	}
+	return fmt.Sprintf(
+		"%s: %s\r\n",
+		strings.Title(h.Key),
+		strings.Join(h.Values, ","),
+	)
+}
+
+func mailHeaders(headers []Header) *bytes.Buffer {
 	var msg bytes.Buffer
-	for k, v := range h {
-		if v != nil {
-			msg.WriteString(fmt.Sprintf(
-				"%s: %s\r\n",
-				strings.Title(k),
-				strings.Join(v, ","),
-			))
-		}
+	for _, h := range headers {
+		msg.WriteString(h.String())
 	}
 	msg.WriteString(GlobalHeaders)
 	return &msg
@@ -56,14 +71,16 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 //
 // Headers keys are rendered Title cased, and the values are joined with a comma separator.
 // Each entry becomes a CRLF separated line. For example:
-//   map[string][]string{"to": []string{"foo@bar.com", "hello@world.com"}}
+//   {"to", []string{"test@test.mailu.io", "admin@test.mailu.io"}}
 // Results in:
-//   To: foo@bar.com,hello@world.com\r\n
-func (m *Mailer) Send(headers map[string][]string, tmplName string, data interface{}, recipients []string) error {
+//   To: test@test.mailu.io,admin@test.mailu.io
+func (m *Mailer) Send(headers []Header, tmplName string, data interface{}, recipients []string) error {
 	msg := mailHeaders(headers)
 	if err := m.tmpl.ExecuteTemplate(msg, tmplName, data); err != nil {
 		return err
 	}
-	fmt.Println(msg)
+	if Debug {
+		log.Printf("mailer: %+v;\n------------\n%s", m, msg)
+	}
 	return smtp.SendMail(m.addr, m.auth, m.from, recipients, msg.Bytes())
 }

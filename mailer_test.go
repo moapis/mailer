@@ -9,11 +9,15 @@ import (
 
 const testMailHeadersOut = "To: foo@bar.com,hello@world.com\r\nFrom: info@spanac.ro\r\n" + GlobalHeaders
 
+func init() {
+	Debug = true
+}
+
 func Test_mailHeaders(t *testing.T) {
 	tests := []struct {
-		name string
-		h    map[string][]string
-		want []byte
+		name    string
+		headers []Header
+		want    []byte
 	}{
 		{
 			"Empty",
@@ -22,17 +26,17 @@ func Test_mailHeaders(t *testing.T) {
 		},
 		{
 			"Mixed entries",
-			map[string][]string{
-				"to":      {"foo@bar.com", "hello@world.com"},
-				"from":    {"info@spanac.ro"},
-				"subject": nil,
+			[]Header{
+				{"to", []string{"foo@bar.com", "hello@world.com"}},
+				{"from", []string{"info@spanac.ro"}},
+				{"subject", nil},
 			},
 			[]byte(testMailHeadersOut),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := mailHeaders(tt.h).Bytes(); !reflect.DeepEqual(got, tt.want) {
+			if got := mailHeaders(tt.headers).Bytes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("New() = \n%swant\n%s", got, tt.want)
 			}
 		})
@@ -98,7 +102,7 @@ func TestMailer_Send(t *testing.T) {
 		auth smtp.Auth
 	}
 	type args struct {
-		headers    map[string][]string
+		headers    []Header
 		tmplName   string
 		data       interface{}
 		recipients []string
@@ -150,10 +154,10 @@ func TestMailer_Send(t *testing.T) {
 				auth: smtp.PlainAuth("", "admin@test.mailu.io", "letmein", "test.mailu.io"),
 			},
 			args{
-				headers: map[string][]string{
-					"to":      {"test@test.mailu.io", "admin@test.mailu.io"},
-					"from":    {"admin@test.mailu.io"},
-					"subject": {"moapis/mailer: Unit tests"},
+				headers: []Header{
+					{"to", []string{"test@test.mailu.io", "admin@test.mailu.io"}},
+					{"from", []string{"admin@test.mailu.io"}},
+					{"subject", []string{"moapis/mailer: Unit tests"}},
 				},
 				tmplName:   "tester",
 				data:       testTmplData,
