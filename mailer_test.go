@@ -23,8 +23,8 @@ func Test_mailHeaders(t *testing.T) {
 		{
 			"Mixed entries",
 			map[string][]string{
-				"to":      []string{"foo@bar.com", "hello@world.com"},
-				"from":    []string{"info@spanac.ro"},
+				"to":      {"foo@bar.com", "hello@world.com"},
+				"from":    {"info@spanac.ro"},
 				"subject": nil,
 			},
 			[]byte(testMailHeadersOut),
@@ -151,9 +151,9 @@ func TestMailer_Send(t *testing.T) {
 			},
 			args{
 				headers: map[string][]string{
-					"to":      []string{"test@test.mailu.io", "admin@test.mailu.io"},
-					"from":    []string{"admin@test.mailu.io"},
-					"subject": []string{"moapis/mailer: Unit tests"},
+					"to":      {"test@test.mailu.io", "admin@test.mailu.io"},
+					"from":    {"admin@test.mailu.io"},
+					"subject": {"moapis/mailer: Unit tests"},
 				},
 				tmplName:   "tester",
 				data:       testTmplData,
