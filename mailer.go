@@ -15,23 +15,22 @@ import (
 
 const (
 	// GlobalHeaders is set on every message.
-	GlobalHeaders = "MIME-Version: 1.0\r\nContent-type: text/hmtl; charset=utf-8\r\n\r\n"
+	GlobalHeaders = "MIME-Version: 1.0\r\nContent-type: text/html; charset=\"UTF-8\"\r\n\r\n"
 )
 
-func mailHeaders(msg *bytes.Buffer, h map[string][]string) error {
+func mailHeaders(h map[string][]string) *bytes.Buffer {
+	var msg bytes.Buffer
 	for k, v := range h {
 		if v != nil {
-			if _, err := fmt.Fprintf(msg,
+			msg.WriteString(fmt.Sprintf(
 				"%s: %s\r\n",
 				strings.Title(k),
 				strings.Join(v, ","),
-			); err != nil {
-				return err
-			}
+			))
 		}
 	}
-	_, err := msg.WriteString(GlobalHeaders)
-	return err
+	msg.WriteString(GlobalHeaders)
+	return &msg
 }
 
 // Mailer holds a html template, server and authentication information for efficient reuse.
@@ -45,7 +44,7 @@ type Mailer struct {
 // New returns a reusable mailer.
 // Tmpl should hold a collection of parsed templates.
 // Addr is the hostname and port used by smtp.SendMail. For example:
-//   "mail.host.com:578"
+//   "mail.host.com:587"
 // From is used in every subsequent SendMail invocation.
 // If auth is nil, connections will omit authentication.
 func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
@@ -57,16 +56,14 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 //
 // Headers keys are rendered Title cased, and the values are joined with a comma seperator.
 // Each entry becomes a CRLF seperated line. For example:
-//   map[string]string{"to": []string{"foo@bar.com", "hello@world.com"}}
+//   map[string][]string{"to": []string{"foo@bar.com", "hello@world.com"}}
 // Results in:
 //   To: foo@bar.com,hello@world.com\r\n
 func (m *Mailer) Send(headers map[string][]string, tmplName string, data interface{}, recipients []string) error {
-	msg := new(bytes.Buffer)
-	if err := mailHeaders(msg, headers); err != nil {
-		return err
-	}
+	msg := mailHeaders(headers)
 	if err := m.tmpl.ExecuteTemplate(msg, tmplName, data); err != nil {
 		return err
 	}
+	fmt.Println(msg)
 	return smtp.SendMail(m.addr, m.auth, m.from, recipients, msg.Bytes())
 }
