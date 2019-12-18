@@ -74,7 +74,7 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 //   {"to", []string{"test@test.mailu.io", "admin@test.mailu.io"}}
 // Results in:
 //   To: test@test.mailu.io,admin@test.mailu.io
-func (m *Mailer) Send(headers []Header, tmplName string, data interface{}, recipients []string) error {
+func (m *Mailer) Send(headers []Header, tmplName string, data interface{}, recipients ...string) error {
 	msg := mailHeaders(headers)
 	if err := m.tmpl.ExecuteTemplate(msg, tmplName, data); err != nil {
 		return err

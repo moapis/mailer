@@ -174,7 +174,7 @@ func TestMailer_Send(t *testing.T) {
 				from: tt.fields.from,
 				auth: tt.fields.auth,
 			}
-			if err := m.Send(tt.args.headers, tt.args.tmplName, tt.args.data, tt.args.recipients); (err != nil) != tt.wantErr {
+			if err := m.Send(tt.args.headers, tt.args.tmplName, tt.args.data, tt.args.recipients...); (err != nil) != tt.wantErr {
 				t.Errorf("Mailer.Send() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
