@@ -180,3 +180,27 @@ func TestMailer_Send(t *testing.T) {
 		})
 	}
 }
+
+func TestTimestamp(t *testing.T) {
+
+	type args struct {
+		headers *[]Header
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "append Date to Headers",
+			args: args{headers: &[]Header{Header{Key: "Test", Values: []string{"test"}}}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Timestamp(tt.args.headers)
+			if len(*got) != 2 {
+				t.Fail()
+			}
+		})
+	}
+}
