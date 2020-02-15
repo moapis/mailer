@@ -68,8 +68,7 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 }
 
 // Timestamp appends current date time to the outbound mail.
-// Mailer.Send now appends current date time by calling Timestamp
-func Timestamp(headers *[]Header) *[]Header {
+func timestamp(headers *[]Header) *[]Header {
 	*headers = append(*headers, Header{Key: "Date", Values: []string{time.Now().UTC().String()}})
 	return headers
 }
@@ -82,8 +81,10 @@ func Timestamp(headers *[]Header) *[]Header {
 //   {"to", []string{"test@test.mailu.io", "admin@test.mailu.io"}}
 // Results in:
 //   To: test@test.mailu.io,admin@test.mailu.io
+//
+// The current time is automatically appended as timestamp header.
 func (m *Mailer) Send(headers []Header, tmplName string, data interface{}, recipients ...string) error {
-	Timestamp(&headers)
+	timestamp(&headers)
 	msg := mailHeaders(headers)
 	if err := m.tmpl.ExecuteTemplate(msg, tmplName, data); err != nil {
 		return err

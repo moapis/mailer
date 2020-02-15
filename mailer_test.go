@@ -197,7 +197,7 @@ func TestTimestamp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Timestamp(tt.args.headers)
+			got := timestamp(tt.args.headers)
 			if len(*got) != 2 {
 				t.Fail()
 			}
