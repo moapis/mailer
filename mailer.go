@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/smtp"
 	"strings"
+	"time"
 )
 
 const (
@@ -66,6 +67,12 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 	return &Mailer{tmpl, addr, from, auth}
 }
 
+// Timestamp appends current date time to the outbound mail.
+func timestamp(headers *[]Header) *[]Header {
+	*headers = append(*headers, Header{Key: "Date", Values: []string{time.Now().UTC().String()}})
+	return headers
+}
+
 // Send renders the headers and named template with passed data.
 // The rendered message is sent using smtp.SendMail, to all the recipients.
 //
@@ -74,7 +81,10 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 //   {"to", []string{"test@test.mailu.io", "admin@test.mailu.io"}}
 // Results in:
 //   To: test@test.mailu.io,admin@test.mailu.io
+//
+// The current time is automatically appended as timestamp header.
 func (m *Mailer) Send(headers []Header, tmplName string, data interface{}, recipients ...string) error {
+	timestamp(&headers)
 	msg := mailHeaders(headers)
 	if err := m.tmpl.ExecuteTemplate(msg, tmplName, data); err != nil {
 		return err
