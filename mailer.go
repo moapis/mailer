@@ -69,7 +69,7 @@ func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 
 // Timestamp appends current date time to the outbound mail.
 func timestamp(headers *[]Header) *[]Header {
-	*headers = append(*headers, Header{Key: "Date", Values: []string{time.Now().UTC().String()}})
+	*headers = append(*headers, Header{Key: "Date", Values: []string{time.Now().Format(time.RFC822Z)}})
 	return headers
 }
 

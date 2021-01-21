@@ -133,7 +133,7 @@ func TestMailer_Send(t *testing.T) {
 			"Send error",
 			fields{
 				tmpl: template.Must(template.New("test").Parse(testTemplate)),
-				addr: "test.mailu.io:578",
+				addr: "test.mailu.io:587",
 				from: "admin@test.mailu.io",
 				auth: nil,
 			},
