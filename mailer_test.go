@@ -156,7 +156,6 @@ func TestMailer_Send(t *testing.T) {
 			args{
 				headers: []Header{
 					{"to", []string{"test@test.mailu.io", "admin@test.mailu.io"}},
-					{"from", []string{"admin@test.mailu.io"}},
 					{"subject", []string{"moapis/mailer: Unit tests"}},
 				},
 				tmplName:   "tester",
@@ -176,30 +175,6 @@ func TestMailer_Send(t *testing.T) {
 			}
 			if err := m.Send(tt.args.headers, tt.args.tmplName, tt.args.data, tt.args.recipients...); (err != nil) != tt.wantErr {
 				t.Errorf("Mailer.Send() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestTimestamp(t *testing.T) {
-
-	type args struct {
-		headers *[]Header
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "append Date to Headers",
-			args: args{headers: &[]Header{Header{Key: "Test", Values: []string{"test"}}}},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := timestamp(tt.args.headers)
-			if len(*got) != 2 {
-				t.Fail()
 			}
 		})
 	}

@@ -61,16 +61,10 @@ type Mailer struct {
 // Tmpl should hold a collection of parsed templates.
 // Addr is the hostname and port used by smtp.SendMail. For example:
 //   "mail.host.com:587"
-// From is used in every subsequent SendMail invocation.
+// From is used in every subsequent SendMail invocation and set as message header.
 // If auth is nil, connections will omit authentication.
 func New(tmpl *template.Template, addr, from string, auth smtp.Auth) *Mailer {
 	return &Mailer{tmpl, addr, from, auth}
-}
-
-// Timestamp appends current date time to the outbound mail.
-func timestamp(headers *[]Header) *[]Header {
-	*headers = append(*headers, Header{Key: "Date", Values: []string{time.Now().Format(time.RFC822Z)}})
-	return headers
 }
 
 // Send renders the headers and named template with passed data.
@@ -84,7 +78,11 @@ func timestamp(headers *[]Header) *[]Header {
 //
 // The current time is automatically appended as timestamp header.
 func (m *Mailer) Send(headers []Header, tmplName string, data interface{}, recipients ...string) error {
-	timestamp(&headers)
+	headers = append(headers,
+		Header{"from", []string{m.from}},
+		Header{"date", []string{time.Now().Format(time.RFC822Z)}},
+	)
+
 	msg := mailHeaders(headers)
 	if err := m.tmpl.ExecuteTemplate(msg, tmplName, data); err != nil {
 		return err
